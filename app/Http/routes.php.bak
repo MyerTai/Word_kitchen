@@ -1,0 +1,137 @@
+<?php
+
+/*
+|--------------------------------------------------------------------------
+| Application Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register all of the routes for an application.
+| It's a breeze. Simply tell Laravel the URIs it should respond to
+| and give it the controller to call when that URI is requested.
+|
+*/
+
+Route::get('/', function () {
+    return view('welcome');
+});
+
+// 正式业务逻辑
+
+// 测试入口
+Route::get('/menu', function(){
+
+});
+
+// 试卷入口
+Route::post('/dish', function(){
+
+});
+
+
+// 管理界面
+
+Route::get('/kitchen', function(){
+
+});
+
+// 学生界面
+Route::get('/dining_area', function(){
+
+});
+
+
+
+
+
+Route::get('testFaker', function(Faker\Factory $faker){
+    //$faker = Faker\Factory::create('zh_CN');
+    $faker = $faker::create('zh_CN');
+    //return json_encode($faker->creditCardDetails, JSON_UNESCAPED_UNICODE);
+    return $faker->creditCardDetails;
+});
+
+
+Route::get('/test/{t}', function($target){
+    return redirect()->route('MW::'.$target);
+})->where('t', '[t1|t2]');
+
+
+Route::group(['as' => 'MW::', 'middleware' => 'test'], function() {
+    //
+    Route::get('/test/t1', ['as' => 't1', function(){
+        $string = Request::input('string');
+        return "MW::t1 Pagina[{$string}]!";
+    }]);
+
+    Route::get('/test/t2', ['as' => 't2', function(){
+        $string = Request::input('string');
+        return "MW::t2 Pagina[{$string}]!";
+    }]);
+});
+Route::get('/refuse/{v?}', ['as' => 'refusePage', function($vaild = null){
+    if ($vaild !== null)
+    {
+        return "禁止入内！";
+    }
+    else
+    {
+        return "非法访问![{$vaild}]";
+    }
+}]);
+
+
+// test $request
+
+Route::match(['get', 'post'], '/hello_tr/{vaild?}', function($vaild = null) {
+    //
+    
+});
+
+
+// Route alias
+Route::get('/hello/alias/{id?}', ['as' => 'testAlias', function($id = 55) {
+    return "Hello Lararel[Alias][ID:{$id}]";
+}])->where('id', '[0-9]+');
+
+Route::get('/testAlias', function() {
+    return redirect()->route('testAlias', ['id' => '']);
+});
+
+Route::match(['get', 'post'], '/hello_m', function() {
+    // 匹配多种请求方式
+    return "Hello Laravel!";
+});
+
+
+Route::any('/users/{id}', function($id) {
+    //匹配全部请求方式
+    return "Hello Laravel[ID:{$id}]!";
+});
+
+
+Route::match(['get'], '/hello_reg/{name?}', function($name = 'none') {
+    //
+    return "Hello Laravel[$name]!";
+})->where('name', '[A-Za-z]+');
+
+
+// 匹配Get请求
+Route::get('/hello', function () {
+    return "Hello Laravel[GET]!";
+});
+
+Route::get('/testPost', function () {
+    $csrf_token = csrf_token();
+    $form = <<<FORM
+        <form action="/hello_p" method="POST">
+            <input type="hidden" name="_token" value="{$csrf_token}">
+            <input type="submit" value="Test"/>
+        </form>
+FORM;
+    return $form;
+});
+
+// 匹配Post请求
+Route::post('/hello_p', function () {
+    return "Hello Laravel[POST]!";
+});
